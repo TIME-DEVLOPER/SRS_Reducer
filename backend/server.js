@@ -36,10 +36,10 @@ app.post("/upload", upload.single("image"), async (req, res) => {
 
     if (compressedSize >= originalSize) {
       fs.copyFileSync(originalPath, compressedPath);
-      console.log("⚠️ Compressed size > Original → Using original file instead!");
+      console.log("Compressed size > Original → Using original file instead!");
     }
 
-    console.log(`📉 Size Reduced: ${(originalSize / 1024).toFixed(2)}KB ➝ ${(compressedSize / 1024).toFixed(2)}KB`);
+    console.log(`Size Reduced: ${(originalSize / 1024).toFixed(2)}KB ➝ ${(compressedSize / 1024).toFixed(2)}KB`);
 
     res.json({
       success: true,
@@ -67,21 +67,21 @@ app.get("/download/:file", (req, res) => {
     if (err) {
       console.error("Download error:", err);
     } else {
-      console.log("⬇️ Download Completed:", compressedFile);
+      console.log("Download Completed:", compressedFile);
 
       if (fs.existsSync(originalPath)) {
         fs.unlinkSync(originalPath);
-        console.log("🗑 Deleted Original:", originalFile);
+        console.log("Deleted Original:", originalFile);
       }
 
       setTimeout(() => {
         if (fs.existsSync(compressedPath)) {
           fs.unlinkSync(compressedPath);
-          console.log("🗑 Deleted Compressed:", compressedFile);
+          console.log("Deleted Compressed:", compressedFile);
         }
       }, 500);
     }
   });
 });
 
-app.listen(5000, () => console.log("🚀 Server Running on http://localhost:5000"));
+app.listen(5000);
