@@ -46,54 +46,47 @@ const KBReducer = () => {
 
     setTimeout(() => {
       window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
-    }, 10000);
+    }, 400);
   };
 
-const handleDownload = async () => {
-  if (!downloadURL) return;
-  setIsDownloaded(true);
+  const handleDownload = async () => {
+    if (!downloadURL) return;
+    setIsDownloaded(true);
 
-  try {
-    // 1️⃣ Fetch file first (mobile support)
-    const response = await fetch(downloadURL);
-    const blob = await response.blob();
+    try {
+      const response = await fetch(downloadURL);
+      const blob = await response.blob();
 
-    // 2️⃣ Create download trigger
-    const link = document.createElement("a");
-    link.href = window.URL.createObjectURL(blob);
-    link.download = "compressed-image.jpg";
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
+      const a = document.createElement("a");
+      a.href = window.URL.createObjectURL(blob);
+      a.download = "compressed-image.jpg";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
 
-    // 3️⃣ Clear blob from memory
-    setTimeout(() => {
-      window.URL.revokeObjectURL(link.href);
-    }, 2000);
+      setTimeout(() => window.URL.revokeObjectURL(a.href), 2000);
 
-  } catch (err) {
-    console.log("⚠️ Blob download failed, using fallback", err);
-
-    // 4️⃣ Fallback for older mobile browsers
-    setTimeout(() => {
+    } catch (error) {
+      console.warn("Blob failed → fallback → server delete safe");
       window.location.href = downloadURL;
-    }, 600);
-  }
-};
+    }
+  };
 
   const reducedPercent =
     originalSize &&
     (((originalSize - (compressedSize || estimatedSize)) / originalSize) * 100).toFixed(1);
 
   return (
-   <div className="min-h-screen flex justify-center items-start p-4 bg-gray-100 overflow-y-auto">
+    <div className="min-h-screen flex justify-center items-start p-4 bg-gray-100 pb-32 overflow-y-auto">
       <div className="bg-white p-6 rounded-xl shadow-xl max-w-xl w-full">
 
         <h1 className="text-2xl font-bold text-center text-blue-600 mb-4">
           SRS Size Reducer
         </h1>
 
-        <label className="font-semibold">Quality: {quality}% • Live Size Update</label>
+        <label className="font-semibold mb-1 block">
+          Quality: {quality}% • Live Size Update
+        </label>
 
         <input
           type="range"
@@ -101,7 +94,7 @@ const handleDownload = async () => {
           max="100"
           value={quality}
           onChange={handleSlider}
-          className="w-full accent-blue-600 mb-3"
+          className="w-full accent-blue-600 mb-4"
         />
 
         <input
@@ -113,7 +106,7 @@ const handleDownload = async () => {
 
         {preview && originalSize && (
           <div className="text-center bg-gray-50 border rounded-lg mt-4 p-3">
-            <p className="font-bold">Original: {originalSize} KB</p>
+            <p className="font-bold text-black">Original: {originalSize} KB</p>
             <p className="font-bold text-green-600">
               {compressedSize
                 ? `Compressed: ${compressedSize} KB`
@@ -125,23 +118,26 @@ const handleDownload = async () => {
 
         {preview && (
           <>
-            <img src={preview} className="rounded-lg border mt-4" alt="" />
+            <img
+              src={preview}
+              className="rounded-lg border mt-4 w-full max-h-[60vh] object-contain"
+              alt=""
+            />
 
             {downloadURL && !isDownloaded && (
               <button
                 onClick={handleDownload}
-                className="mt-5 w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-lg font-bold fixed bottom-4 left-2 right-2 z-50 shadow-lg"
+                className="w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-lg font-bold sticky bottom-2 mt-6 shadow-xl"
               >
                 ⬇ Download Compressed Image
               </button>
             )}
 
-            <button
-              onClick={handleDownload}
-              className="mt-5 w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-lg font-bold sticky bottom-0 left-0 right-0 z-50 shadow-xl mx-auto"
-            >
-              ⬇ Download Compressed Image
-            </button>
+            {isDownloaded && (
+              <p className="text-green-700 mt-3 text-center font-semibold">
+                ✔ Downloading… Files Deleted Securely 🔐
+              </p>
+            )}
           </>
         )}
 
