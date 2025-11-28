@@ -36,10 +36,8 @@ app.post("/upload", upload.single("image"), async (req, res) => {
 
     if (compressedSize >= originalSize) {
       fs.copyFileSync(originalPath, compressedPath);
-      console.log("Compressed size > Original → Using original file instead!");
     }
 
-    console.log(`Size Reduced: ${(originalSize / 1024).toFixed(2)}KB ➝ ${(compressedSize / 1024).toFixed(2)}KB`);
 
     res.json({
       success: true,
@@ -51,7 +49,6 @@ app.post("/upload", upload.single("image"), async (req, res) => {
     });
 
   } catch (err) {
-    console.error("Compression error:", err);
     res.status(500).json({ error: "Compression Failed", err });
   }
 });
@@ -65,19 +62,15 @@ app.get("/download/:file", (req, res) => {
 
   res.download(compressedPath, (err) => {
     if (err) {
-      console.error("Download error:", err);
     } else {
-      console.log("Download Completed:", compressedFile);
 
       if (fs.existsSync(originalPath)) {
         fs.unlinkSync(originalPath);
-        console.log("Deleted Original:", originalFile);
       }
 
       setTimeout(() => {
         if (fs.existsSync(compressedPath)) {
           fs.unlinkSync(compressedPath);
-          console.log("Deleted Compressed:", compressedFile);
         }
       }, 500);
     }
